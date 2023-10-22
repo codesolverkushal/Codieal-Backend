@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const { use } = require('../routes');
 module.exports.profile = function(req, res){
     return res.render('user_profile', {
         title: 'User Profile'
@@ -40,7 +41,32 @@ module.exports.create = async (req,res)=>{
     }
 }
 
-module.exports.createSession = function(req,res){
-    //todo later
+module.exports.createSession = async (req,res)=>{
     
+    try{
+    //find the user 
+    const existingUser = await User.findOne({email:req.body.email});
+     //handle user found
+    if(existingUser){
+        //handle password which don't match
+        if(existingUser.password != req.body.password){
+            return res.status(400).send('Bhai password to sahi daal');
+        }
+         //handle session creation
+
+         res.cookie('user_id',existingUser.id);
+         return res.redirect('/users/profile');
+    }
+    else{
+        res.status(404).send('Kya bhai sign-up bhi nhi kiya hai? karlo bhai rupaya nhi lag rha...')
+    }
+    } catch (error){
+        console.error('Error during signin:', error);
+        return res.status(500).send("An error occurred during signin");
+    }
+         
+         
+              
+               
+
 }
